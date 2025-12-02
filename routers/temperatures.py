@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from session_db import db_session
-import crud.temperature
+import crud.temperatures
 import crud.cities
 import schemas.temperature
 import python_weather
@@ -9,19 +9,19 @@ import python_weather
 router = APIRouter()
 
 
-@router.get("/temperatures/", response_model=list[schemas.temperature.GetTemperature])
+@router.get("/temperatures", response_model=list[schemas.temperature.GetTemperature])
 def get_temperature_all(city_id: int | None = None, db: Session = Depends(db_session)):
-    return crud.temperature.get_temperature(db, city_id)
+    return crud.temperatures.get_temperature(db, city_id)
 
 
 @router.get("/temperatures/{city_id}", response_model=schemas.temperature.GetTemperature)
 def get_temperature_by_id(city_id: int, db: Session = Depends(db_session)):
-    return crud.temperature.get_temperature_id(db, city_id)
+    return crud.temperatures.get_temperature_id(db, city_id)
 
 
-@router.post("/temperatures/", response_model=schemas.temperature.GetTemperature)
+@router.post("/temperatures", response_model=schemas.temperature.GetTemperature)
 async def create_temp(create_t: schemas.temperature.CreateTemperature, db: Session = Depends(db_session)):
-    city_name = crud.temperature.get_name_city_by_id(db, city_id=create_t.city_id)
+    city_name = crud.temperatures.get_name_city_by_id(db, city_id=create_t.city_id)
     if city_name is None:
         raise HTTPException(
             status_code=404,
@@ -29,7 +29,7 @@ async def create_temp(create_t: schemas.temperature.CreateTemperature, db: Sessi
         )
     async with python_weather.Client(unit=python_weather.IMPERIAL) as client:
         weather = await client.get(city_name)
-    db_create_temp = crud.temperature.create_temperature(db=db, create_temp=create_t, today_weather=weather.temperature)
+    db_create_temp = crud.temperatures.create_temperature(db=db, create_temp=create_t, today_weather=weather.temperature)
     if db_create_temp is None:
         raise HTTPException(
             status_code=400,
@@ -50,7 +50,7 @@ async def update_temp(db: Session = Depends(db_session)):
     async with python_weather.Client(unit=python_weather.IMPERIAL) as client:
         for city in cities:
             weather = await client.get(city.name)
-            db_update = crud.temperature.update_temperature(db, city, weather.temperature)
+            db_update = crud.temperatures.update_temperature(db, city, weather.temperature)
             result.append(db_update)
 
     return result

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import cities, temperature
+from routers import cities, temperatures
 from db import models, database
 
 
@@ -12,6 +12,6 @@ def read_root():
     return {"Hello": "World"}
 
 app.include_router(cities.router)
-app.include_router(temperature.router)
+app.include_router(temperatures.router)
 
 

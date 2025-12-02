@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from schemas import temperature
 from db import models
-from datetime import date
+from datetime import date, datetime
 
 
 def get_temperature(db: Session, city_id: int | None = None):
@@ -10,8 +10,8 @@ def get_temperature(db: Session, city_id: int | None = None):
     return db.query(models.Temperature).all()
 
 
-def get_temperature_id(db: Session, city_id: int):
-    return db.query(models.Temperature).filter(models.Temperature.id == city_id).first()
+def get_temperature_id(db: Session, temperature_id: int):
+    return db.query(models.Temperature).filter(models.City.id == temperature_id).first()
 
 
 def get_name_city_by_id(db: Session, city_id):
@@ -41,8 +41,13 @@ def update_temperature(db: Session, city, today_weather):
     ).first()
     if db_temp:
         db_temp.temperature = today_weather
-        db_temp.date_time = date.today()
+        db_temp.date_time = datetime.now()
         db.commit()
         db.refresh(db_temp)
-        return db_temp
-    return None
+    else:
+        create_new_temp = temperature.CreateTemperature(city_id = city.id,
+        date_time = datetime.now(),
+        temperature = today_weather)
+        db_temp = create_temperature(db, create_new_temp, today_weather)
+
+    return db_temp

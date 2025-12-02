@@ -1,9 +1,8 @@
 from pydantic import BaseModel
-from datetime import date
-
+from datetime import datetime
 
 class BaseTemperature(BaseModel):
-    date_time: date
+    date_time: datetime
     temperature: float
 
 
