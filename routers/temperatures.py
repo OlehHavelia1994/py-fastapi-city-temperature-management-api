@@ -16,7 +16,13 @@ def get_temperature_all(city_id: int | None = None, db: Session = Depends(db_ses
 
 @router.get("/temperatures/{city_id}", response_model=schemas.temperature.GetTemperature)
 def get_temperature_by_id(city_id: int, db: Session = Depends(db_session)):
-    return crud.temperatures.get_temperature_id(db, city_id)
+    db_city_id = crud.temperatures.get_temperature_id(db, city_id)
+    if db_city_id is None:
+        raise HTTPException(
+            status_code=404,
+            detail= f"Temperature record not found for city ID {city_id}"
+        )
+    return db_city_id
 
 
 @router.post("/temperatures", response_model=schemas.temperature.GetTemperature)
